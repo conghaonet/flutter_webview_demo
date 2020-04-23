@@ -6,8 +6,9 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class WebviewPage extends StatefulWidget {
   final String url;
+  final WebView webView;
 
-  WebviewPage({this.url, Key key}): super(key: key);
+  WebviewPage({this.url, this.webView, Key key}): super(key: key);
 
   @override
   _WebviewPageState createState() => _WebviewPageState();
@@ -21,12 +22,12 @@ class _WebviewPageState extends State<WebviewPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          this.widget.url ?? '',
-            overflow: TextOverflow.fade,
+          widget.url ?? '',
+          overflow: TextOverflow.fade,
         ),
       ),
       body: Container(
-        child: WebView(
+        child: widget.webView ?? WebView(
           initialUrl: this.widget.url ?? 'https://flutter.dev',
           javascriptMode: JavascriptMode.unrestricted,
           onWebViewCreated: (WebViewController webViewController) {
@@ -42,5 +43,9 @@ class _WebviewPageState extends State<WebviewPage> {
         ),
       ),
     );
+  }
+  @override
+  void dispose() {
+    super.dispose();
   }
 }
