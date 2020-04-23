@@ -39,19 +39,19 @@ class _MyHomePageState extends State<MyHomePage> {
   
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(this.widget.title),
-      ),
-      bottomNavigationBar: Container(
-        height: 50,
-        color: Colors.amber,
-        child: Center(child: Text('bottomNavigationBar')),
-      ),
-      body: IndexedStack(
-        index: _stackIndex,
-        children: <Widget>[
-          Column(
+    return IndexedStack(
+      index: _stackIndex,
+      children: <Widget>[
+        Scaffold(
+          appBar: AppBar(
+            title: Text(this.widget.title),
+          ),
+          bottomNavigationBar: Container(
+            height: 50,
+            color: Colors.amber,
+            child: Center(child: Text('bottomNavigationBar')),
+          ),
+          body: Column(
             children: <Widget>[
               RaisedButton(
                 child: Text('baidu.com'),
@@ -64,17 +64,9 @@ class _MyHomePageState extends State<MyHomePage> {
               RaisedButton(
                 child: Text('flutter.dev'),
                 onPressed: () async {
-                  if(_controller.isCompleted) {
-                    await _controller.future.then((controller) async {
-                      String currentUrl = await controller.currentUrl();
-                      if(currentUrl != 'https://flutter.dev') {
-                        controller.loadUrl('https://flutter.dev');
-                      }
-                    });
-                    setState(() {
-                      _stackIndex=1;
-                    });
-                  }
+                  setState(() {
+                    _stackIndex=1;
+                  });
                 },
               ),
               RaisedButton(
@@ -93,28 +85,94 @@ class _MyHomePageState extends State<MyHomePage> {
                   }
                 },
               ),
+              RaisedButton(
+                child: Text('video youtube'),
+                onPressed: () async {
+                  if(_controller.isCompleted) {
+                    await _controller.future.then((controller) async {
+                      String currentUrl = await controller.currentUrl();
+                      if(currentUrl != 'https://m.youtube.com/watch?v=vnj2i6RNo3g') {
+                        controller.loadUrl('https://m.youtube.com/watch?v=vnj2i6RNo3g');
+                      }
+                    });
+                    setState(() {
+                      _stackIndex=1;
+                    });
+                  }
+                },
+              ),
             ],
           ),
-          WillPopScope(
-            onWillPop: () async {
-              if(_stackIndex == 1) {
-                _stackIndex = 0;
-                setState(() {
+        ),
+        GameWebView(url: 'https://flutter.dev', onClose: () {
+          if(_stackIndex != 0) {
+            setState(() {
+              _stackIndex = 0;
+            });
+          }
+        },),
+      ],
+    );
+  }
+}
 
-                });
-                return false;
-              }
-              else return true;
+typedef OnCloseWebView = Function();
+class GameWebView extends StatefulWidget {
+  final String url;
+  final OnCloseWebView onClose;
+
+  GameWebView({this.url, this.onClose, Key key}): super(key: key);
+
+  @override
+  _GameWebViewState createState() => _GameWebViewState();
+}
+
+class _GameWebViewState extends State<GameWebView> {
+  final Completer<WebViewController> _controller = Completer<WebViewController>();
+
+  Future<bool> _onBack() async {
+    if(_controller.isCompleted) {
+      await _controller.future.then((controller) async {
+        if(await controller.canGoBack()) {
+          await controller.goBack();
+        } else {
+          if(widget.onClose != null) {
+            widget.onClose();
+          }
+        }
+      });
+    } else {
+      if(widget.onClose != null) {
+        widget.onClose();
+      }
+    }
+    return false;
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          this.widget.url,
+        ),
+        leading: BackButton(
+          onPressed: () => _onBack(),
+        ),
+      ),
+      body: Container(
+        child: WillPopScope(
+          onWillPop: () async {
+            return _onBack();
+          },
+          child: WebView(
+            initialUrl: widget.url,
+            javascriptMode: JavascriptMode.unrestricted,
+            initialMediaPlaybackPolicy: AutoMediaPlaybackPolicy.always_allow,
+            onWebViewCreated: (WebViewController webViewController) {
+              _controller.complete(webViewController);
             },
-            child: WebView(
-              javascriptMode: JavascriptMode.unrestricted,
-              onWebViewCreated: (WebViewController webViewController) {
-                _controller.complete(webViewController);
-              },
-
-            ),
           ),
-        ],
+        ),
       ),
     );
   }
