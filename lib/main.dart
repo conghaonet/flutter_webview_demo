@@ -46,10 +46,12 @@ class _MyHomePageState extends State<MyHomePage> {
           appBar: AppBar(
             title: Text(this.widget.title),
           ),
-          bottomNavigationBar: Container(
-            height: 50,
-            color: Colors.amber,
-            child: Center(child: Text('bottomNavigationBar')),
+          bottomNavigationBar: SafeArea(
+            child: Container(
+              height: 50,
+              color: Colors.amber,
+              child: Center(child: Text('bottomNavigationBar')),
+            ),
           ),
           body: Column(
             children: <Widget>[
