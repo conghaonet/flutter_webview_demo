@@ -167,7 +167,7 @@ class _GameWebViewState extends State<GameWebView> {
           child: WebView(
             initialUrl: widget.url,
             javascriptMode: JavascriptMode.unrestricted,
-            initialMediaPlaybackPolicy: AutoMediaPlaybackPolicy.always_allow,
+            gestureNavigationEnabled: true,
             onWebViewCreated: (WebViewController webViewController) {
               _controller.complete(webViewController);
             },
